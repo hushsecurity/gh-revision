@@ -18,6 +18,33 @@ func (a *CreateArgs) GetHash() (string, error) {
 	return revParse("HEAD")
 }
 
+func (a *CreateArgs) resolveMessage() error {
+	if len(a.MessageFile) == 0 {
+		return nil
+	}
+
+	if len(a.Message) > 0 {
+		return fmt.Errorf("-m and -F are mutually exclusive")
+	}
+
+	if a.MessageFile == "-" && a.Edit {
+		return fmt.Errorf("-F - cannot be combined with -e")
+	}
+
+	message, err := readMessageFile(a.MessageFile)
+	if err != nil {
+		return err
+	}
+
+	if len(message) == 0 && !a.Edit {
+		return fmt.Errorf("empty revision comment in '%s': aborted", a.MessageFile)
+	}
+
+	a.Message = message
+
+	return nil
+}
+
 func checkPrState(pr PullRequest) error {
 	if pr.IsDraft {
 		return fmt.Errorf("pr is draft")
@@ -170,6 +197,10 @@ func createRevision(args CreateArgs) error {
 	ioStreams := iostreams.System()
 	ioStreams.StartProgressIndicator()
 	defer ioStreams.StopProgressIndicator()
+
+	if err := args.resolveMessage(); err != nil {
+		return err
+	}
 
 	hash, err := args.GetHash()
 	if err != nil {
