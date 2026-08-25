@@ -15,6 +15,7 @@ type CreateArgs struct {
 	Commitish    string   `arg:"-c, --commitish" help:"a commitish to associate the revision with (HEAD if omitted)"`
 	Edit         bool     `arg:"-e, --editor" help:"open an editor to add revision comment"`
 	Message      string   `arg:"-m, --message" help:"add this as revision comment"`
+	MessageFile  string   `arg:"-F, --message-file" help:"read revision comment from this file ('-' for stdin)"`
 	UserReviewer []string `arg:"-r, --reviewer,separate" help:"add a user reviewer to the pull-request"`
 	TeamReviewer []string `arg:"-t, --team-reviewer,separate" help:"add a team reviewer to the pull-request"`
 	NoReview     bool     `arg:"-n, --no-review" help:"do not send review requests"`

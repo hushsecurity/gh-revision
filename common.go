@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"runtime"
@@ -130,6 +131,22 @@ func addPrComment(path string) (string, error) {
 		return "", fmt.Errorf("'gh pr comment' failed: %v", err)
 	}
 	return strings.TrimSpace(output.String()), nil
+}
+
+func readMessageFile(path string) (string, error) {
+	var data []byte
+	var err error
+
+	if path == "-" {
+		data, err = io.ReadAll(os.Stdin)
+	} else {
+		data, err = os.ReadFile(path)
+	}
+	if err != nil {
+		return "", fmt.Errorf("failed to read message file: %v", err)
+	}
+
+	return strings.TrimRight(string(bytes.TrimPrefix(data, bom)), "\n"), nil
 }
 
 func editUserComment(ioStreams *iostreams.IOStreams, message string) (string, error) {
